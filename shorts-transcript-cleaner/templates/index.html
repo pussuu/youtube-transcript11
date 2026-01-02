@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YouTube Shorts Transcript Cleaner</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>YouTube Shorts Transcript Cleaner</h1>
+
+      <form method="post" action="/generate" class="input-form">
+        <label for="channel_url">YouTube Channel URL</label>
+        <input
+          type="url"
+          id="channel_url"
+          name="channel_url"
+          placeholder="https://www.youtube.com/@channelName"
+          value="{{ channel_url }}"
+          required
+        />
+
+        <label for="language">Transcript language (ISO code)</label>
+        <input
+          type="text"
+          id="language"
+          name="language"
+          value="en"
+        />
+
+        <label for="max_shorts">Max Shorts to process</label>
+        <input
+          type="number"
+          id="max_shorts"
+          name="max_shorts"
+          min="1"
+          max="500"
+          value="{{ max_shorts }}"
+        />
+
+        <button type="submit">Generate Transcripts</button>
+      </form>
+
+      {% if error %}
+      <div class="alert alert-error">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      {% if transcripts and transcripts|length > 0 %}
+      <section class="actions">
+        <form method="post" action="/download">
+          <input type="hidden" name="channel_url" value="{{ channel_url }}" />
+          <input type="hidden" name="language" value="en" />
+          <input type="hidden" name="max_shorts" value="{{ max_shorts }}" />
+          <button type="submit">Download all as .txt</button>
+        </form>
+      </section>
+
+      <section class="transcripts">
+        {% for t in transcripts %}
+        <article class="transcript">
+          <h2>Transcript {{ t.index }}</h2>
+          {% if t.title %}
+          <p class="video-title">
+            {{ t.title }} -
+            <a href="{{ t.url }}" target="_blank" rel="noopener noreferrer">
+              Open video
+            </a>
+          </p>
+          {% endif %}
+
+          {% if t.has_transcript %}
+          <p class="transcript-text">
+            {{ t.transcript }}
+          </p>
+          {% else %}
+          <p class="no-transcript">
+            No transcript available. {{ t.error or '' }}
+          </p>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
